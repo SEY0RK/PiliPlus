@@ -1006,10 +1006,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   });
 
   Widget childWhenDisabledAlmostSquareInner(bool isFullScreen) {
+
+    final size = MediaQuery.sizeOf(context);
+
+    final bool unfoldedLarge = size.shortestSide >= 600 &&
+
+        maxWidth - (maxHeight - padding.vertical) * (9 / 16) - padding.horizontal >= 200;
     if (enableVerticalExpand) {
       return Obx(
         () {
-          if (videoDetailController.isVertical.value && !isPortrait) {
+          if (videoDetailController.isVertical.value &&
+              (!isPortrait || unfoldedLarge)) {
             return childSplit(9 / 16);
           }
 
