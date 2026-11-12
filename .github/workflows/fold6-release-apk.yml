@@ -1,0 +1,43 @@
+name: Fold6 Release APK
+on:
+  workflow_dispatch:
+jobs:
+  android-release:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with: { fetch-depth: 0 }
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: "17"
+          cache: gradle
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          cache: true
+      - name: Apply Patch
+        shell: pwsh
+        run: lib/scripts/patch.ps1 android
+      - name: Prepare version
+        shell: pwsh
+        run: lib/scripts/build.ps1 android
+      - name: Build release APK
+        run: flutter build apk --release --dart-define-from-file=pili_release.json --no-pub
+      - name: Rename
+        shell: bash
+        run: |
+          ls -l build/app/outputs/flutter-apk/
+          cp build/app/outputs/flutter-apk/app-release.apk PiliPlus_fold6_release.apk
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: PiliPlus_fold6_release.apk
+          path: PiliPlus_fold6_release.apk
+          if-no-files-found: error
+          archive: false
